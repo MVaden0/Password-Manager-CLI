@@ -1,12 +1,21 @@
 import os
 import json
 import base64
+from typing import TypedDict, List
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 from cryptography.fernet import Fernet
 
+
+AuthenticationInformation = TypedDict(
+    'AuthenticationInformation', 
+    application=str,
+    username=str,
+    password=str, 
+    label=str
+)
 
 def generate_key_from_password(
         password: str
@@ -37,31 +46,42 @@ def generate_key_from_password(
 
     return _key
 
-# we will be encrypting the below string.
-message = [
-    {
-        "application" : "PayPal"
-    }
-]
+
+def encrypt_json_information(
+        key: bytes, 
+        data: List[AuthenticationInformation]
+    ):
+    """
+    Encrypts a json object into bytes.
+
+    Parameters:
+    key (bytes) - encryption key
+    data (List[AuthenticationInformation]) - json information
+
+    Returns:
+    (bytes) - json information encrypted into bytes
+    """
+
+    fernet = Fernet(key)
  
+    return fernet.encrypt(json.dumps(data).encode())
+
+
+def decrypt_json_information(
+        key: bytes, 
+        data: bytes
+    ):
+    """
+    Decrypts a bytes object into json
+
+    Parameters:
+    key (bytes) - encryption key
+    data (List[AuthenticationInformation]) - json information
+
+    Returns:
+    (List[AuthenticationInformation]) - json information decrypted from bytes
+    """
+
+    fernet = Fernet(key)
  
-# Instance the Fernet class with the key
- 
-fernet = Fernet(generate_key_from_password("my pass"))
- 
-# then use the Fernet class instance
-# to encrypt the string string must
-# be encoded to byte string before encryption
-encMessage = fernet.encrypt(json.dumps(message).encode())
- 
-print("original string: ", message)
-print("encrypted string: ", encMessage)
- 
-# decrypt the encrypted string with the
-# Fernet instance of the key,
-# that was used for encrypting the string
-# encoded byte string is returned by decrypt method,
-# so decode it to string with decode methods
-decMessage = fernet.decrypt(encMessage).decode()
- 
-print("decrypted string: ", decMessage)
+    return fernet.decrypt(data).decode()

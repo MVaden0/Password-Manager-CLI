@@ -1,8 +1,20 @@
-from cryptography.fernet import Fernet
-import hashlib
-import base64
+from utils import (
+    generate_key_from_password, 
+    encrypt_json_information, 
+    decrypt_json_information
+)
 
-my_password = 'swordfish'
-key = hashlib.md5(my_password.encode('ascii')).hexdigest()
-key_64 = base64.urlsafe_b64encode()
-cipher = Fernet(key_64).encrypt("My dirty secrets")
+
+message = [
+    {
+        "application" : "PayPal",
+        "username": "michaels username",
+        "password": "michaels password"
+    }
+]
+
+key = generate_key_from_password("my pass")
+
+enc = encrypt_json_information(key, message)
+
+print(decrypt_json_information(key, enc))
