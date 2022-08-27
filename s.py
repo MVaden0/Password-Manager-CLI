@@ -2,6 +2,8 @@ from email import message
 import sys
 import time
 import os
+from color import Color
+
 
 class List:
     def __init__(self, prompt, answers):
@@ -9,7 +11,7 @@ class List:
         self.answers = answers
 
     def draw(self):
-        print(self.prompt)
+        print(f'{Color.CRED}{self.prompt}{Color.CEND}')
 
         for answer in self.answers:
             print(answer)
